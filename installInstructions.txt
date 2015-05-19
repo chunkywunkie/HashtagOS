@@ -1,0 +1,82 @@
+Downloading python-instagram:
+
+First download the following modules:
+httplib2
+simplejson
+six
+
+By using the following command:
+'easy_install <package_name>'
+
+e.g.
+% easy_install httplib2
+
+------------------------
+
+If you run into administrator/write permissions like I did, run this instead:
+
+% easy_install --prefix=$HOME/local <package_name>
+
+You need to add '$HOME/local/lib/python<X.Y>/site-packages' to your $PYTHONPATH
+<X.Y> is the python version, the error will probably echo which python version you have
+
+This will install all the third-party modules to this local directory 
+
+Add it by:
+
+% cd ~ # home directory
+
+With favorite text editor, update .bash_profile
+
+Add:
+PYTHONPATH="${PYTHONPATH}:%HOME/local/lib/python<X.Y>/site-packages/"
+
+Save file
+
+% source ~.bash_profile # updates the terminal to your preferences
+
+
+Now you can run for each of the modules
+
+% easy_install --prefix=$HOME/local httplib2
+% easy_install --prefix=$HOME/local simplejson
+% easy_install --prefix=$HOME/local six
+
+
+Also download pip
+
+% easy_install --prefix=$HOME/local pip
+
+
+----------------------
+
+Creating alias for pip
+
+Go back and edit ~.bash_profile
+
+Add:
+
+alias pip='$HOME/local/bin/pip'
+
+Save file.
+
+% source ~.bash_profile
+
+----------------------
+
+Now to actually install python-instagram
+
+% pip install python-instagram
+
+
+if that doesn't work try:
+
+% pip install --install-option="--prefix=$HOME/local" python-instagram
+
+
+Everything should be downloaded and be available when you run python.
+Try running the test application in the repository to verify that the downloads worked.
+
+
+:)
+
