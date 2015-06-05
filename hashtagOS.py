@@ -1,9 +1,13 @@
 from instagram.client import InstagramAPI
+from datetime import datetime
 import sys
 
+# jackie's then annie's
+instaclient = [('3e454d27b2704004ad3871fbe1aefa72', 'ea6fd488ddd34cb58be7bbefac99c2f8'), ('53bb6879057f4591834ba38265fdbcb4', 'b4bd805279254a139a66ccebb256d9cf')]
 
-api = InstagramAPI(client_id='3e454d27b2704004ad3871fbe1aefa72', 
-client_secret='ea6fd488ddd34cb58be7bbefac99c2f8')
+currentID = 0
+api = InstagramAPI(client_id=instaclient[currentID][0], 
+client_secret=instaclient[currentID][1])
 
 """
 Search for tags recently associated w/ a particular tag
@@ -51,6 +55,26 @@ def printTaglist(counter):
 
 
 """
+Switch client id, if possible
+"""
+def switchAPI(cid):
+    # toggle client index
+    if cid == 0:
+        currentID = 1
+        print "Switched to Annie's client info"
+    else: 
+        currentID = 0
+        print "Switched to Jackie's client info"
+
+    try:
+        api = InstagramAPI(client_id=instaclient[currentID][0], 
+        client_secret=instaclient[currentID][1])
+        return True
+    except:
+        print "Something failed"
+        return False
+
+"""
 Creates internal structure to hold tag data
 and represent the relationships
 """
@@ -80,8 +104,9 @@ def hashGraph(tags, degree, mtype, results):
         try:
             tagncount = _hashSearch(tag, mtype)
         except:
-            print "Too many API requests :(( "
-            return
+            if not switchAPI(currentID):
+                print "Too many API requests :(( "
+                return
         if not tagncount: continue        
        
         # update mapping appropriately
@@ -108,49 +133,81 @@ def hashGraph(tags, degree, mtype, results):
             hashGraph(valueList(tagncount), degree-1, mtype, results[key])
         except:
             # more than likely too many API requests
-            # FIXME: switch client id/secret?
-            print "Too many API requests :((("
-            return
+            if not switchAPI(currentID):
+                print "Too many API requests :((("
+                return
+
 """
-Write results, draft version.
+Writes out the results by printing the tags relationships line-by-line
+"""
+def unravel(tagdata, degree, keys, perline):
+    if not tagdata:
+        line = ' '
+        line = line.join(keys)
+        perline.append(line)
+        if keys: keys.pop()
+        return
+
+    for k, v in tagdata.items():
+        tag, count = k[0], k[1]
+        try:
+            tokens = str(tag) + "(" + str(count) + ")"
+        except UnicodeEncodeError: # avoid unicode tags 
+            continue
+        keys.append(tokens) # the key will always be valid
+        unravel(v, degree, keys, perline)
+
+    if keys: keys.pop()
+     
+"""
+Write results, filename indicates details of run.
 Just prints relationship on each line with their associated count
 """
-def writeResults(degree, tagdata):
-    outfile = open('result.out', 'w') # TODO: time/day and primary tag added to ouptut file
+def writeResults(degree, primarytags, mediatype, tagdata):
     
-    # FIXME: remove hard coding only writes up to 2 degrees
-    # FIXME: dealing with tags in unicode
-    for k, v in tagdata.items():
-        if v:
-            for kk, vv in v.items():
-                if vv:
-                    for k3, v3 in vv.items():
-                        try:
-                            text = '%s(%d) %s(%d) %s(%d)\n' % (k[0], int(k[1]), kk[0], int(kk[1]), k3[0], int(k3[1]))
-                            outfile.write(text)
-                        except UnicodeEncodeError:
-                            pass
+    # concatenate primary tags
+    primary = '_'
+    primary = primary.join(primarytags) + '_'
+    
+    # append time and day to filename
+    today = datetime.today()
+    date = str(today.month) + '.' + str(today.day) + '.' + str(today.year)
+    time = str(today.hour) + ':' + str(today.minute)
+
+    outfilename = primary + date + '-' + time + '_deg' + str(degree) + '_' + mediatype + '.out'
+
+    outfile = open(outfilename, 'w') 
+    
+    perlinetag = []
+    unravel(tagdata, degree, [], perlinetag)
+
+    # Write out line per tag
+    for l in perlinetag:
+        outfile.write(l + "\n") 
+
     outfile.close()
     
 
 """
-TODO: Pass in arguments, rather than hard-code
+Entry point
+1st argument is media type
+2nd argument is degree of separation
+3rd+ argument(s) is list of primary tags to start search.
 """
 def main():
-
     # starting parameters
     res = dict()
-    d = 2
-    mtype = 'recent'    
-    primarytags = ['dog']
+    mtype = sys.argv[1]    
+    d = int(sys.argv[2])
+    primarytags = sys.argv[3:]
 
     try:
         hashGraph(primarytags, d, mtype, res)
     except:
-        print "Too many API requests :("
-        #FIXME: switch client id/secret?
+        if not switchAPI(currentID):
+            print "Too many API requests :("
 
-    writeResults(d, res)  # write any results
+    writeResults(d, primarytags, mtype, res)  # write any results
 
 
 if __name__ == "__main__":
