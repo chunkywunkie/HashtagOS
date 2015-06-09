@@ -65,8 +65,12 @@ void setup()
   String donut = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/donutday";
   String ucdavis = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/ucdavis";
   String playoffs = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/nbaplayoffs";
+  String dog = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/dog";
+  String starbucks = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/starbucks";
+  String ucdavisPop = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/ucdavisPop"; // not conclusive
+  String cat = "/Users/jchu/Documents/Academic/UCD/Spring2015/OS/Final Project/HashtagOS/data/images/cat";
   
-  String infile = playoffs; // modify this.
+  String infile = cat; // modify this.
   
   // place images in list of PImage objects
   File folder = new File(infile);
